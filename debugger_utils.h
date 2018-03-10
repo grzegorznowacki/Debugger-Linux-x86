@@ -20,7 +20,7 @@
 
 
 
-void stepi(pid_t child_pid, int wait_status, unsigned int* counter);
+void stepi(pid_t child_pid, int* wait_status, unsigned int* counter);
 
 void print_registers(const struct user_regs_struct* regs);
 

@@ -63,7 +63,7 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
         }
         else if(strcmp(command_name, "stepi\n") == 0)
         {
-            stepi(child_pid, wait_status, &counter);
+            stepi(child_pid, &wait_status, &counter);
         }
         else if(strcmp(command_name, "next\n") == 0)
         {

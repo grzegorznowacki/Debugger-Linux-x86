@@ -4,9 +4,9 @@
 
 #include "debugger_utils.h"
 
-void stepi(pid_t child_pid, int wait_status, unsigned int* counter)
+void stepi(pid_t child_pid, int* wait_status, unsigned int* counter)
 {
-    if(WIFSTOPPED(wait_status))
+    if(WIFSTOPPED(*wait_status))
     {
         (*counter)++;
         struct user_regs_struct registers;
@@ -18,7 +18,7 @@ void stepi(pid_t child_pid, int wait_status, unsigned int* counter)
             return;
         }
 
-        wait(&wait_status);
+        wait(wait_status);
 
         ptrace(PTRACE_GETREGS, child_pid, 0, &registers);
         unsigned int next_eip = registers.eip;
@@ -26,8 +26,10 @@ void stepi(pid_t child_pid, int wait_status, unsigned int* counter)
         printf("Executed instruction [%d]: ", *counter);
         print_instruction_opcode(child_pid, eip, next_eip);
     }
-    //TODO jak dojedziemy do konca programu to chyba powinnismy
-    //TODO sprawdzic przy pomocy WIFEXITED albo jakos tak
+    else if(WIFEXITED(*wait_status))
+    {
+        printf("Debugee program has ended\n");
+    }
 }
 
 void info_registers(pid_t child_pid)
