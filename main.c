@@ -1,16 +1,4 @@
-#include <stdio.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <syscall.h>
-#include <sys/ptrace.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <sys/reg.h>
-#include <sys/user.h>
-#include <unistd.h>
-#include <errno.h>
-#include <string.h>
+#include "debugger_utils.h"
 
 #define COMMAND_LEN 30
 
@@ -29,6 +17,7 @@ void run_debuggee_proc(const char* prog_name)
 void run_debugger_proc(pid_t child_pid)
 {
     int wait_status;
+    unsigned int counter = 0;
     char command_name[COMMAND_LEN];  //TODO - overflow
 
     printf("%s\n", "Parent proc");
@@ -65,7 +54,7 @@ void run_debugger_proc(pid_t child_pid)
         }
         else if(strcmp(command_name, "stepi\n") == 0)
         {
-
+            stepi(child_pid, wait_status, &counter);
         }
         else if(strcmp(command_name, "next\n") == 0)
         {
