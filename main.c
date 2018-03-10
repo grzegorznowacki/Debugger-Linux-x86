@@ -64,6 +64,10 @@ void run_debugger_proc(pid_t child_pid)
         {
 
         }
+        else if(strcmp(command_name, "info registers\n") == 0)
+        {
+            info_registers(child_pid);
+        }
 
         printf("(deb)");
     }

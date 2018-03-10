@@ -26,6 +26,8 @@ void print_registers(const struct user_regs_struct* regs);
 
 void print_instruction_opcode(pid_t pid, unsigned int from_addr, unsigned int to_addr);
 
+void info_registers(pid_t child_pid);
+
 #define DEBUGGER_LINUX_X86_DEBUGGER_UTILS_H
 
 #endif //DEBUGGER_LINUX_X86_DEBUGGER_UTILS_H
