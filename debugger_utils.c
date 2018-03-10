@@ -122,4 +122,6 @@ void break_at_address(pid_t child_pid, int* wait_status, const char* command_nam
     //TODO i ogolnie dokonczyc bo na razei zrobilem tylko create
     //TODO tu bedzie trzeb zrobic to co jest w resume from breakpoint!!!
     //TODO + patrz to co na kartce napisalem
+    //TODO TO NIE TU A W RUN I CONTINUE PO WAIT TRZEBA JEDNAK IMPLEMENTOWAC!!!
+    //i moze tez w stepi itd !!! plus ta tablica do zrobienia i sprwadzenia!!
 }
