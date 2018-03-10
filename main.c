@@ -63,6 +63,10 @@ void run_debugger_proc(pid_t child_pid)
         {
 
         }
+        else if(strcmp(command_name, "stepi\n") == 0)
+        {
+
+        }
         else if(strcmp(command_name, "next\n") == 0)
         {
 
