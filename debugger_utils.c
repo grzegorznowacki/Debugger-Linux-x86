@@ -109,7 +109,17 @@ void free_breakpoint(breakpoint_struct* breakpoint)
     free(breakpoint);
 }
 
-void break_address(pid_t child_pid, int* wait_status)
+void break_at_address(pid_t child_pid, int* wait_status, const char* command_name, breakpoint_struct** breakpoint_array, int* insert_elem)
 {
+    char address_array[8];
+    strncpy(address_array, command_name + 8, 8);    //TODO ???
+    unsigned int address = (unsigned int)strtol(address_array, NULL, 16);   //TODO ???
 
+    breakpoint_struct* breakpoint = create_breakpoint(child_pid, (void*)address);
+
+    (*insert_elem)++;
+    //TODO wtablice wskznikow zrobic
+    //TODO i ogolnie dokonczyc bo na razei zrobilem tylko create
+    //TODO tu bedzie trzeb zrobic to co jest w resume from breakpoint!!!
+    //TODO + patrz to co na kartce napisalem
 }

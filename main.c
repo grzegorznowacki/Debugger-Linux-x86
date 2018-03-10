@@ -15,13 +15,25 @@ void run_debuggee_proc(const char* prog_name)
     execl(prog_name, prog_name, 0);
 }
 
+void nullify_array(breakpoint_struct** breakpoint_array)
+{
+    int i;
+    for(i = 0; i < MAX_BREAKPOINTS; ++i)
+    {
+        breakpoint_array[i] = NULL;
+    }
+}
+
 void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
 {
     char is_first_run = 1;  //treated as boolean - missing in C
     int wait_status;
     unsigned int counter = 0;
     char command_name[COMMAND_LEN];
+
     breakpoint_struct* breakpoint_array[MAX_BREAKPOINTS];
+    int  insert_elem = 0;
+    nullify_array(breakpoint_array);
 
     printf("%s\n", "Parent proc");
 
@@ -75,7 +87,7 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
         {
             if(strncmp(command_name, "break 0x", 8) == 0)
             {
-                break_address(child_pid, &wait_status);
+                break_at_address(child_pid, &wait_status, command_name, breakpoint_array, &insert_elem);
             }
             //TODO przypadek - linia w kodzie
             //TODO przypadek - nazwa funkcji

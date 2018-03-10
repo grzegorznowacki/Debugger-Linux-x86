@@ -44,7 +44,7 @@ void run(pid_t child_pid, int* wait_status);
 
 void run_new(const char* child_prog_name);
 
-void break_address(pid_t child_pid, int* wait_status);
+void break_at_address(pid_t child_pid, int* wait_status, const char* command_name, breakpoint_struct** breakpoint_array, int* insert_elem);
 
 #define DEBUGGER_LINUX_X86_DEBUGGER_UTILS_H
 
