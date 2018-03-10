@@ -28,6 +28,10 @@ void print_instruction_opcode(pid_t pid, unsigned int from_addr, unsigned int to
 
 void info_registers(pid_t child_pid);
 
+void run(void);
+
+void run_new(const char* child_prog_name);
+
 #define DEBUGGER_LINUX_X86_DEBUGGER_UTILS_H
 
 #endif //DEBUGGER_LINUX_X86_DEBUGGER_UTILS_H

@@ -14,11 +14,12 @@ void run_debuggee_proc(const char* prog_name)
     execl(prog_name, prog_name, 0);
 }
 
-void run_debugger_proc(pid_t child_pid)
+void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
 {
+    char is_first_run = 1;  //treated as boolean - missing in C
     int wait_status;
     unsigned int counter = 0;
-    char command_name[COMMAND_LEN];  //TODO - overflow
+    char command_name[COMMAND_LEN];
 
     printf("%s\n", "Parent proc");
 
@@ -42,7 +43,15 @@ void run_debugger_proc(pid_t child_pid)
         }
         else if(strcmp(command_name, "run\n") == 0)
         {
-
+            if(is_first_run == 1)
+            {
+                run();
+                is_first_run = 0;
+            }
+            else
+            {
+                run_new(child_prog_name);
+            }
         }
         else if(strcmp(command_name, "continue\n") == 0)
         {
@@ -88,7 +97,7 @@ int main(int argc, char** argv)
     if(child_pid == 0)
         run_debuggee_proc(argv[1]);
     else if(child_pid > 0)
-        run_debugger_proc(child_pid);
+        run_debugger_proc(child_pid, argv[1]);
     else
     {
         perror("Fork error");

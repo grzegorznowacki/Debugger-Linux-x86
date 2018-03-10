@@ -26,6 +26,8 @@ void stepi(pid_t child_pid, int wait_status, unsigned int* counter)
         printf("Executed instruction [%d]: ", *counter);
         print_instruction_opcode(child_pid, eip, next_eip);
     }
+    //TODO jak dojedziemy do konca programu to chyba powinnismy
+    //TODO sprawdzic przy pomocy WIFEXITED albo jakos tak
 }
 
 void info_registers(pid_t child_pid)
@@ -50,5 +52,27 @@ void print_instruction_opcode(pid_t pid, unsigned int from_addr, unsigned int to
         printf("%02x", word & 0xFF);
     }
     printf("\n");
+}
+
+extern void run_debuggee_proc(const char* prog_name);
+extern void run_debugger_proc(pid_t child_pid, const char* child_prog_name);
+
+void run_new(const char* child_prog_name)
+{
+    pid_t child_pid = fork();
+    if(child_pid == 0)
+        run_debuggee_proc(child_prog_name);
+    else if(child_pid > 0)
+        run_debugger_proc(child_pid, child_prog_name);
+    else
+    {
+        perror("Fork error");
+        return;
+    }
+}
+
+void run(void)
+{
+
 }
 
