@@ -18,7 +18,7 @@ void stepi(pid_t child_pid, int* wait_status, unsigned int* counter)
             return;
         }
 
-        wait(wait_status);
+        wait(wait_status);  //NOTE that wait_status is passed through pointer
 
         ptrace(PTRACE_GETREGS, child_pid, 0, &registers);
         unsigned int next_eip = registers.eip;
@@ -73,8 +73,43 @@ void run_new(const char* child_prog_name)
     }
 }
 
-void run(void)
+//TODO run - nie jestem pewien czy to wystarczy
+//TODO moze cos jeszcze z makrami WIF...
+void run(pid_t child_pid, int* wait_status)
+{
+    ptrace(PTRACE_CONT, child_pid, 0, 0);
+    wait(wait_status);
+}
+
+void enable_breakpoint(pid_t pid, breakpoint_struct* breakpoint)
+{
+    assert(breakpoint);
+    breakpoint->original_data = ptrace(PTRACE_PEEKTEXT, pid, breakpoint->address, 0);
+    ptrace(PTRACE_POKETEXT, pid, breakpoint->address, (breakpoint->original_data & 0xFFFFFF00) | 0xCC);
+}
+
+void disable_breakpoint(pid_t pid, breakpoint_struct* breakpoint)
+{
+    assert(breakpoint);
+    unsigned int data = ptrace(PTRACE_PEEKTEXT, pid, breakpoint->address, 0);
+    assert((data & 0xFF) == 0xCC);
+    ptrace(PTRACE_POKETEXT, pid, breakpoint->address, (data & 0xFFFFFF00) | (breakpoint->original_data & 0xFF));
+}
+
+breakpoint_struct* create_breakpoint(pid_t pid, void* addr)
+{
+    breakpoint_struct* breakpoint = malloc(sizeof(breakpoint_struct));
+    breakpoint->address = addr;
+    enable_breakpoint(pid, breakpoint);
+    return breakpoint;
+}
+
+void free_breakpoint(breakpoint_struct* breakpoint)
+{
+    free(breakpoint);
+}
+
+void break_address(pid_t child_pid, int* wait_status)
 {
 
 }
-

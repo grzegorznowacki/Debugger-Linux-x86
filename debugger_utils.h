@@ -17,8 +17,20 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
+#include <assert.h>
 
+typedef struct breakpoint_struct_t breakpoint_struct;
 
+struct breakpoint_struct_t
+{
+    void* address;
+    unsigned int original_data;
+};
+
+void enable_breakpoint(pid_t pid, breakpoint_struct* breakpoint);
+void disable_breakpoint(pid_t pid, breakpoint_struct* breakpoint);
+breakpoint_struct* create_breakpoint(pid_t pid, void* addr);
+void free_breakpoint(breakpoint_struct* breakpoint);
 
 void stepi(pid_t child_pid, int* wait_status, unsigned int* counter);
 
@@ -28,9 +40,11 @@ void print_instruction_opcode(pid_t pid, unsigned int from_addr, unsigned int to
 
 void info_registers(pid_t child_pid);
 
-void run(void);
+void run(pid_t child_pid, int* wait_status);
 
 void run_new(const char* child_prog_name);
+
+void break_address(pid_t child_pid, int* wait_status);
 
 #define DEBUGGER_LINUX_X86_DEBUGGER_UTILS_H
 

@@ -1,6 +1,7 @@
 #include "debugger_utils.h"
 
 #define COMMAND_LEN 30
+#define MAX_BREAKPOINTS 20
 
 void run_debuggee_proc(const char* prog_name)
 {
@@ -20,6 +21,7 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
     int wait_status;
     unsigned int counter = 0;
     char command_name[COMMAND_LEN];
+    breakpoint_struct* breakpoint_array[MAX_BREAKPOINTS];
 
     printf("%s\n", "Parent proc");
 
@@ -45,7 +47,7 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
         {
             if(is_first_run == 1)
             {
-                run();
+                run(child_pid, &wait_status);
                 is_first_run = 0;
             }
             else
@@ -71,7 +73,12 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
         }
         else if(strncmp(command_name, "break ", 6) == 0)    //IMPORTANT - space after break
         {
-
+            if(strncmp(command_name, "break 0x", 8) == 0)
+            {
+                break_address(child_pid, &wait_status);
+            }
+            //TODO przypadek - linia w kodzie
+            //TODO przypadek - nazwa funkcji
         }
         else if(strcmp(command_name, "info registers\n") == 0)
         {
