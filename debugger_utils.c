@@ -178,9 +178,13 @@ breakpoint_struct* create_breakpoint(pid_t pid, void* addr)
     return breakpoint;
 }
 
-void free_breakpoint(breakpoint_struct* breakpoint)
+void free_breakpoint_array(breakpoint_struct** breakpoint_array)
 {
-    free(breakpoint);
+    int i;
+    for(i = 0; i < MAX_BREAKPOINTS; ++i)
+    {
+        free(breakpoint_array[i]);
+    }
 }
 
 void break_at_address(pid_t child_pid, int* wait_status, const char* command_name, breakpoint_struct** breakpoint_array, int* insert_elem)

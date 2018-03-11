@@ -33,7 +33,7 @@ struct breakpoint_struct_t
 void enable_breakpoint(pid_t pid, breakpoint_struct* breakpoint);
 void disable_breakpoint(pid_t pid, breakpoint_struct* breakpoint);
 breakpoint_struct* create_breakpoint(pid_t pid, void* addr);
-void free_breakpoint(breakpoint_struct* breakpoint);
+void free_breakpoint_array(breakpoint_struct** breakpoint_array);
 
 breakpoint_struct* check_if_breakpoint(pid_t child_pid, breakpoint_struct** breakpoint_array, int* insert_elem);
 

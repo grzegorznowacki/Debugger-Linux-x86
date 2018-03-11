@@ -49,6 +49,7 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
         //TODO Wiec sie tym nie martwimy, co nie???
         if(strcmp(command_name, "quit\n") == 0) //IMPORTANT - \n - because fgets puts also LF into command_name
         {
+            free_breakpoint_array(breakpoint_array);
             printf("%s", "Exiting debugger\n");
             return;
         }
