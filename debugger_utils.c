@@ -4,10 +4,19 @@
 
 #include "debugger_utils.h"
 
-int stepi(pid_t child_pid, int* wait_status, unsigned int* counter)
+int stepi(pid_t child_pid, int* wait_status, unsigned int* counter, breakpoint_struct** breakpoint_array, int* insert_elem)
 {
     if(WIFSTOPPED(*wait_status))
     {
+        breakpoint_struct* breakpoint = NULL;
+
+        breakpoint = check_if_breakpoint(child_pid, breakpoint_array, insert_elem);
+
+        if(breakpoint != NULL)
+        {
+            
+        }
+
         (*counter)++;
         struct user_regs_struct registers;
         ptrace(PTRACE_GETREGS, child_pid, 0, &registers);
@@ -25,6 +34,10 @@ int stepi(pid_t child_pid, int* wait_status, unsigned int* counter)
 
         printf("Executed instruction [%d]: ", *counter);
         print_instruction_opcode(child_pid, eip, next_eip);
+
+//        if(breakpoint != NULL)  //if was not found in the array - means that someone has deleted breakpoint in the meanwhile
+//            enable_breakpoint(child_pid, breakpoint);
+
         return 0;
     }
     else if(WIFEXITED(*wait_status))
@@ -90,7 +103,7 @@ int run(pid_t child_pid, int* wait_status, breakpoint_struct** breakpoint_array,
         return 1;
 }
 
-int continue_debugging(pid_t child_pid, int* wait_status, breakpoint_struct** breakpoint_array, int* insert_elem)
+breakpoint_struct* check_if_breakpoint(pid_t child_pid, breakpoint_struct** breakpoint_array, int* insert_elem)
 {
     breakpoint_struct* breakpoint = NULL;
     struct user_regs_struct registers;
@@ -103,9 +116,16 @@ int continue_debugging(pid_t child_pid, int* wait_status, breakpoint_struct** br
         if((breakpoint_array[i] != NULL) && ((long)breakpoint_array[i]->address == registers.eip))  //IMPORTANT - here is no address + 1 as in clean_breakpoint_and_stepback()
         {
             breakpoint = breakpoint_array[i];
-            break;
+            return breakpoint;
         }
     }
+}
+
+int continue_debugging(pid_t child_pid, int* wait_status, breakpoint_struct** breakpoint_array, int* insert_elem)
+{
+    breakpoint_struct* breakpoint = NULL;
+
+    breakpoint = check_if_breakpoint(child_pid, breakpoint_array, insert_elem);
 
     if (ptrace(PTRACE_SINGLESTEP, child_pid, 0, 0) < 0)
     {

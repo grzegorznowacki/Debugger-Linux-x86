@@ -35,9 +35,11 @@ void disable_breakpoint(pid_t pid, breakpoint_struct* breakpoint);
 breakpoint_struct* create_breakpoint(pid_t pid, void* addr);
 void free_breakpoint(breakpoint_struct* breakpoint);
 
+breakpoint_struct* check_if_breakpoint(pid_t child_pid, breakpoint_struct** breakpoint_array, int* insert_elem);
+
 int clean_breakpoint_and_stepback(pid_t pid, int* wait_status, breakpoint_struct** breakpoint_array, int* insert_elem);
 
-int stepi(pid_t child_pid, int* wait_status, unsigned int* counter);
+int stepi(pid_t child_pid, int* wait_status, unsigned int* counter, breakpoint_struct** breakpoint_array, int* insert_elem);
 
 void print_registers(const struct user_regs_struct* regs);
 
