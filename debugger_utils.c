@@ -12,15 +12,15 @@ int stepi(pid_t child_pid, int* wait_status, unsigned int* counter, breakpoint_s
 
         breakpoint = check_if_breakpoint(child_pid, breakpoint_array, insert_elem);
 
-        if(breakpoint != NULL)
-        {
-            
-        }
-
         (*counter)++;
         struct user_regs_struct registers;
         ptrace(PTRACE_GETREGS, child_pid, 0, &registers);
-        unsigned int eip = registers.eip;
+        unsigned int eip = registers.eip;           //TODO long int should be
+
+        if((breakpoint != NULL) && ((ptrace(PTRACE_PEEKTEXT, child_pid, breakpoint->address, 0) & 0xFF) == 0xCC))
+        {
+            disable_breakpoint(child_pid, breakpoint);
+        }
 
         if (ptrace(PTRACE_SINGLESTEP, child_pid, 0, 0) < 0) {
             perror("ptrace");
@@ -35,8 +35,10 @@ int stepi(pid_t child_pid, int* wait_status, unsigned int* counter, breakpoint_s
         printf("Executed instruction [%d]: ", *counter);
         print_instruction_opcode(child_pid, eip, next_eip);
 
-//        if(breakpoint != NULL)  //if was not found in the array - means that someone has deleted breakpoint in the meanwhile
-//            enable_breakpoint(child_pid, breakpoint);
+        if(breakpoint != NULL)
+        {
+            enable_breakpoint(child_pid, breakpoint);
+        }
 
         return 0;
     }
