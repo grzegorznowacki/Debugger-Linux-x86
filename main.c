@@ -1,8 +1,5 @@
 #include "debugger_utils.h"
 
-#define COMMAND_LEN 30
-#define MAX_BREAKPOINTS 20
-
 void run_debuggee_proc(const char* prog_name)
 {
     printf("%s\n", "Child proc");
@@ -59,7 +56,7 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
         {
             if(is_first_run == 1)
             {
-                run(child_pid, &wait_status);
+                run(child_pid, &wait_status, breakpoint_array, &insert_elem);
                 is_first_run = 0;
             }
             else
@@ -89,12 +86,20 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
             {
                 break_at_address(child_pid, &wait_status, command_name, breakpoint_array, &insert_elem);
             }
-            //TODO przypadek - linia w kodzie
+            //TODO przypadek - linia w kodzie - to chyba moze skorzystac z funkcji break_at_address()
             //TODO przypadek - nazwa funkcji
         }
         else if(strcmp(command_name, "info registers\n") == 0)
         {
             info_registers(child_pid);
+        }
+        else if(strcmp(command_name, "clear \n") == 0)  //TODO clear line_num
+        {
+
+        }
+        else if(strcmp(command_name, "del \n") == 0)    //TODO del breakpt_num
+        {
+
         }
 
         printf("(deb)");

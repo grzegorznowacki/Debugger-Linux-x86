@@ -75,10 +75,13 @@ void run_new(const char* child_prog_name)
 
 //TODO run - nie jestem pewien czy to wystarczy
 //TODO moze cos jeszcze z makrami WIF...
-void run(pid_t child_pid, int* wait_status)
+void run(pid_t child_pid, int* wait_status, breakpoint_struct** breakpoint_array, int* insert_elem)
 {
     ptrace(PTRACE_CONT, child_pid, 0, 0);
     wait(wait_status);
+
+    //TODO - wywolac clean_breakpoint + if/else dla wartosci zwracanej
+    clean_breakpoint_and_stepback(child_pid, wait_status, breakpoint_array, insert_elem);
 }
 
 void enable_breakpoint(pid_t pid, breakpoint_struct* breakpoint)
@@ -112,11 +115,12 @@ void free_breakpoint(breakpoint_struct* breakpoint)
 void break_at_address(pid_t child_pid, int* wait_status, const char* command_name, breakpoint_struct** breakpoint_array, int* insert_elem)
 {
     char address_array[8];
-    strncpy(address_array, command_name + 8, 8);    //TODO ???
-    unsigned int address = (unsigned int)strtol(address_array, NULL, 16);   //TODO ???
+    strncpy(address_array, command_name + 8, 8);    //TODO ??? chyba ok
+    unsigned int address = (unsigned int)strtol(address_array, NULL, 16);   //TODO ??? chyba ok
+    //TODO long zamiast unsigned int??? na 32 bitach to chyba to samo
 
     breakpoint_struct* breakpoint = create_breakpoint(child_pid, (void*)address);
-
+    breakpoint_array[*insert_elem] = breakpoint;
     (*insert_elem)++;
     //TODO wtablice wskznikow zrobic
     //TODO i ogolnie dokonczyc bo na razei zrobilem tylko create
@@ -125,3 +129,38 @@ void break_at_address(pid_t child_pid, int* wait_status, const char* command_nam
     //TODO TO NIE TU A W RUN I CONTINUE PO WAIT TRZEBA JEDNAK IMPLEMENTOWAC!!!
     //i moze tez w stepi itd !!! plus ta tablica do zrobienia i sprwadzenia!!
 }
+
+int clean_breakpoint_and_stepback(pid_t pid, int* wait_status, breakpoint_struct** breakpoint_array, int* insert_elem)
+{
+    breakpoint_struct* breakpoint;
+    struct user_regs_struct registers;
+
+    ptrace(PTRACE_GETREGS, pid, 0, &registers);
+
+    int i;
+    for(i = 0; i < MAX_BREAKPOINTS; ++i)
+    {
+        if((breakpoint_array[i] != NULL) && ((long)breakpoint_array[i]->address + 1 == registers.eip))
+        {
+            breakpoint = breakpoint_array[i];
+            break;
+        }
+    }
+
+    registers.eip = (long) breakpoint->address;
+    ptrace(PTRACE_SETREGS, pid, 0, &registers);
+    disable_breakpoint(pid, breakpoint);
+}
+
+//if (ptrace(PTRACE_SINGLESTEP, pid, 0, 0) < 0) {
+//perror("ptrace");
+//return -1;
+//}
+//
+//wait(wait_status);
+//
+//if (WIFEXITED(*wait_status)) {
+//return 0;
+//}
+//
+//enable_breakpoint(pid, breakpoint);
