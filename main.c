@@ -56,8 +56,12 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
         {
             if(is_first_run == 1)
             {
-                run(child_pid, &wait_status, breakpoint_array, &insert_elem);
+                int ret_status = run(child_pid, &wait_status, breakpoint_array, &insert_elem);
                 is_first_run = 0;
+                if (ret_status == 0)
+                {
+                    printf("Debuggee program has ended\n\n");
+                }
             }
             else
             {
@@ -66,7 +70,20 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
         }
         else if(strcmp(command_name, "continue\n") == 0)
         {
+            if(is_first_run == 1)
+            {
+                printf("%s", "<continue> not possible here - use <run> instead");
+                is_first_run = 0;
+            }
+            else
+            {
+                int ret_status = continue_debugging(child_pid, &wait_status, breakpoint_array, &insert_elem);
 
+                if (ret_status == 0)
+                {
+                    printf("Debuggee program has ended\n\n");
+                }
+            }
         }
         else if(strcmp(command_name, "step\n") == 0)
         {
@@ -74,7 +91,9 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
         }
         else if(strcmp(command_name, "stepi\n") == 0)
         {
-            stepi(child_pid, &wait_status, &counter);
+            int ret_status = stepi(child_pid, &wait_status, &counter);
+            if(ret_status == 1)
+                printf("Debugee program has ended\n");
         }
         else if(strcmp(command_name, "next\n") == 0)
         {
@@ -98,6 +117,10 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
 
         }
         else if(strcmp(command_name, "del \n") == 0)    //TODO del breakpt_num
+        {
+
+        }
+        else if(strcmp(command_name, "info break\n") == 0)    //TODO show breakpoints
         {
 
         }

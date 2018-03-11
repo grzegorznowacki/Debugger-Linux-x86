@@ -4,7 +4,7 @@
 
 #include "debugger_utils.h"
 
-void stepi(pid_t child_pid, int* wait_status, unsigned int* counter)
+int stepi(pid_t child_pid, int* wait_status, unsigned int* counter)
 {
     if(WIFSTOPPED(*wait_status))
     {
@@ -15,7 +15,7 @@ void stepi(pid_t child_pid, int* wait_status, unsigned int* counter)
 
         if (ptrace(PTRACE_SINGLESTEP, child_pid, 0, 0) < 0) {
             perror("ptrace");
-            return;
+            return -1;
         }
 
         wait(wait_status);  //NOTE that wait_status is passed through pointer
@@ -25,10 +25,11 @@ void stepi(pid_t child_pid, int* wait_status, unsigned int* counter)
 
         printf("Executed instruction [%d]: ", *counter);
         print_instruction_opcode(child_pid, eip, next_eip);
+        return 0;
     }
     else if(WIFEXITED(*wait_status))
     {
-        printf("Debugee program has ended\n");
+       return 1;
     }
 }
 
@@ -75,13 +76,61 @@ void run_new(const char* child_prog_name)
 
 //TODO run - nie jestem pewien czy to wystarczy
 //TODO moze cos jeszcze z makrami WIF...
-void run(pid_t child_pid, int* wait_status, breakpoint_struct** breakpoint_array, int* insert_elem)
+int run(pid_t child_pid, int* wait_status, breakpoint_struct** breakpoint_array, int* insert_elem)
 {
     ptrace(PTRACE_CONT, child_pid, 0, 0);
     wait(wait_status);
 
-    //TODO - wywolac clean_breakpoint + if/else dla wartosci zwracanej
+    if (WIFEXITED(*wait_status))
+        return 0;
+
     clean_breakpoint_and_stepback(child_pid, wait_status, breakpoint_array, insert_elem);
+
+    if (WIFSTOPPED(*wait_status))
+        return 1;
+}
+
+int continue_debugging(pid_t child_pid, int* wait_status, breakpoint_struct** breakpoint_array, int* insert_elem)
+{
+    breakpoint_struct* breakpoint = NULL;
+    struct user_regs_struct registers;
+
+    ptrace(PTRACE_GETREGS, child_pid, 0, &registers);
+
+    int i;
+    for(i = 0; i < MAX_BREAKPOINTS; ++i)
+    {
+        if((breakpoint_array[i] != NULL) && ((long)breakpoint_array[i]->address == registers.eip))  //IMPORTANT - here is no address + 1 as in clean_breakpoint_and_stepback()
+        {
+            breakpoint = breakpoint_array[i];
+            break;
+        }
+    }
+
+    if (ptrace(PTRACE_SINGLESTEP, child_pid, 0, 0) < 0)
+    {
+        perror("ptrace");
+        return -1;
+    }
+
+    wait(wait_status);
+
+    if (WIFEXITED(*wait_status))
+        return 0;
+
+    if(breakpoint != NULL)  //if was not found in the array - means that someone has deleted breakpoint in the meanwhile
+        enable_breakpoint(child_pid, breakpoint);
+
+    ptrace(PTRACE_CONT, child_pid, 0, 0);
+    wait(wait_status);
+
+    if (WIFEXITED(*wait_status))
+        return 0;
+
+    clean_breakpoint_and_stepback(child_pid, wait_status, breakpoint_array, insert_elem);
+
+    if (WIFSTOPPED(*wait_status))
+        return 1;
 }
 
 void enable_breakpoint(pid_t pid, breakpoint_struct* breakpoint)
@@ -130,6 +179,7 @@ void break_at_address(pid_t child_pid, int* wait_status, const char* command_nam
     //i moze tez w stepi itd !!! plus ta tablica do zrobienia i sprwadzenia!!
 }
 
+//TODO change to void probably
 int clean_breakpoint_and_stepback(pid_t pid, int* wait_status, breakpoint_struct** breakpoint_array, int* insert_elem)
 {
     breakpoint_struct* breakpoint;
@@ -152,15 +202,3 @@ int clean_breakpoint_and_stepback(pid_t pid, int* wait_status, breakpoint_struct
     disable_breakpoint(pid, breakpoint);
 }
 
-//if (ptrace(PTRACE_SINGLESTEP, pid, 0, 0) < 0) {
-//perror("ptrace");
-//return -1;
-//}
-//
-//wait(wait_status);
-//
-//if (WIFEXITED(*wait_status)) {
-//return 0;
-//}
-//
-//enable_breakpoint(pid, breakpoint);

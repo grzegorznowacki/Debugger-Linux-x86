@@ -37,7 +37,7 @@ void free_breakpoint(breakpoint_struct* breakpoint);
 
 int clean_breakpoint_and_stepback(pid_t pid, int* wait_status, breakpoint_struct** breakpoint_array, int* insert_elem);
 
-void stepi(pid_t child_pid, int* wait_status, unsigned int* counter);
+int stepi(pid_t child_pid, int* wait_status, unsigned int* counter);
 
 void print_registers(const struct user_regs_struct* regs);
 
@@ -45,7 +45,9 @@ void print_instruction_opcode(pid_t pid, unsigned int from_addr, unsigned int to
 
 void info_registers(pid_t child_pid);
 
-void run(pid_t child_pid, int* wait_status, breakpoint_struct** breakpoint_array, int* insert_elem);
+int run(pid_t child_pid, int* wait_status, breakpoint_struct** breakpoint_array, int* insert_elem);
+
+int continue_debugging(pid_t child_pid, int* wait_status, breakpoint_struct** breakpoint_array, int* insert_elem);
 
 void run_new(const char* child_prog_name);
 
