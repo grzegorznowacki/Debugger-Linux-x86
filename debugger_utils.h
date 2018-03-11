@@ -53,6 +53,8 @@ void run_new(const char* child_prog_name);
 
 void break_at_address(pid_t child_pid, int* wait_status, const char* command_name, breakpoint_struct** breakpoint_array, int* insert_elem);
 
+void info_break(pid_t child_pid, breakpoint_struct** breakpoint_array, int* insert_elem);
+
 #define DEBUGGER_LINUX_X86_DEBUGGER_UTILS_H
 
 #endif //DEBUGGER_LINUX_X86_DEBUGGER_UTILS_H

@@ -122,7 +122,7 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
         }
         else if(strcmp(command_name, "info break\n") == 0)    //TODO show breakpoints
         {
-
+            info_break(child_pid, breakpoint_array, &insert_elem);
         }
 
         printf("(deb)");

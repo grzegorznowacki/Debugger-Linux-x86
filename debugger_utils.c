@@ -202,3 +202,22 @@ int clean_breakpoint_and_stepback(pid_t pid, int* wait_status, breakpoint_struct
     disable_breakpoint(pid, breakpoint);
 }
 
+void info_break(pid_t child_pid, breakpoint_struct** breakpoint_array, int* insert_elem)
+{
+    int is_any = 0;
+    int i;
+
+    printf("Enabled breakpoints: \n");
+
+    for(i = 0; i < MAX_BREAKPOINTS; ++i)
+    {
+        if(breakpoint_array[i] != NULL)
+        {
+            printf("[%d] 0x%08X\n", i, breakpoint_array[i]->address);
+            is_any = 1;
+        }
+    }
+
+    if(is_any == 0)
+        printf("%s\n", "No breakpoints are set");
+}
