@@ -1,5 +1,13 @@
 #include "debugger_utils.h"
 
+
+/*TODO zabezpieczyc, ze po zakonczeniu sie programu
+ * debugowanego uzywania opcji del breakpoint ( a konkretnie deisable_breakpoint)
+ * bo SIGABRT
+ * */
+
+
+
 void run_debuggee_proc(const char* prog_name)
 {
     printf("%s\n", "Child proc");
@@ -119,7 +127,15 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
         }
         else if(strncmp(command_name, "del ", 4) == 0)    //TODO del breakpt_num
         {
-            del_breakpoint(child_pid, &wait_status, command_name, breakpoint_array, &insert_elem);
+            int break_num = del_breakpoint(child_pid, &wait_status, command_name, breakpoint_array, &insert_elem);
+            if(break_num != -1)
+            {
+                printf("%s%d\n", "Deleted breakpoint: ", break_num);
+            }
+            else
+            {
+                printf("%s\n", "No such breakpoint");
+            }
         }
         else if(strcmp(command_name, "info break\n") == 0)    //TODO show breakpoints
         {
