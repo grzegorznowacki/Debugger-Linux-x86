@@ -113,11 +113,11 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
         {
             info_registers(child_pid);
         }
-        else if(strncmp(command_name, 6,"clear ") == 0)  //TODO clear line_num
+        else if(strncmp(command_name, "clear ", 6) == 0)  //TODO clear line_num
         {
 
         }
-        else if(strncmp(command_name, 4,"del ") == 0)    //TODO del breakpt_num
+        else if(strncmp(command_name, "del ", 4) == 0)    //TODO del breakpt_num
         {
             del_breakpoint(child_pid, &wait_status, command_name, breakpoint_array, &insert_elem);
         }
