@@ -247,3 +247,14 @@ void info_break(pid_t child_pid, breakpoint_struct** breakpoint_array, int* inse
     if(is_any == 0)
         printf("%s\n", "No breakpoints are set");
 }
+
+void del_breakpoint(pid_t child_pid, int *wait_status, const char* command_name, breakpoint_struct **breakpoint_array, int *insert_elem)
+{
+    char break_num_array[BREAK_ARG_LEN];
+    strncpy(break_num_array, command_name + 4, BREAK_ARG_LEN);
+    char* new_line_ptr = strchr(break_num_array, '\n');
+    *new_line_ptr = '\0';
+    int break_num = (int)strtol(break_num_array, NULL, 10);
+
+    printf("%d", break_num);
+}
