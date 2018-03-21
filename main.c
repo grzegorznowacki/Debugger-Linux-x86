@@ -1,3 +1,5 @@
+#include <libdwarf.h>
+#include <fcntl.h>
 #include "debugger_utils.h"
 
 
@@ -40,6 +42,24 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
     int  insert_elem = 0;
     nullify_array(breakpoint_array);
 
+    //DWARF SECTION
+    Dwarf_Debug dbg = 0;
+    Dwarf_Error err;
+    int file_desc = -1;
+
+    if((file_desc = open(child_prog_name, O_RDONLY)) < 0)
+    {
+        perror("open");
+        return;
+    }
+
+    if(dwarf_init(file_desc, DW_DLC_READ, 0, 0, &dbg, &err) != DW_DLV_OK)
+    {
+        printf("%s", "DWARF init failed");
+        return;
+    }
+    //END OF DWARF SECTION
+
     printf("%s\n", "Parent proc");
 
     wait(&wait_status);
@@ -58,6 +78,16 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
         if(strcmp(command_name, "quit\n") == 0) //IMPORTANT - \n - because fgets puts also LF into command_name
         {
             free_breakpoint_array(breakpoint_array);
+
+            //DWARF SECTION
+            if(dwarf_finish(dbg, &err) != DW_DLV_OK)
+            {
+                printf("%s", "DWARF finish failed");
+                return;
+            }
+            close(file_desc);
+            //END OF DWARF SECTION
+
             printf("%s", "Exiting debugger\n");
             return;
         }
