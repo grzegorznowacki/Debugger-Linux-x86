@@ -268,3 +268,8 @@ int del_breakpoint(pid_t child_pid, int *wait_status, const char* command_name, 
         return -1;
     }
 }
+
+void break_at_function(pid_t child_pid, int *wait_status, const char *command_name, breakpoint_struct **breakpoint_array, int *insert_elem)
+{
+
+}

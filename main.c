@@ -144,8 +144,12 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
             {
                 break_at_address(child_pid, &wait_status, command_name, breakpoint_array, &insert_elem);
             }
+            //TODO wiele plikow
             //TODO przypadek - linia w kodzie - to chyba moze skorzystac z funkcji break_at_address()
-            //TODO przypadek - nazwa funkcji
+            if(strncmp(command_name, "break ", 6) == 0)     //zmienic API ewentualnie, zeby odroznic break linenum od break function
+            {
+                break_at_function(child_pid, &wait_status, command_name, breakpoint_array, &insert_elem);    //tu tez zmienic API bo wczytuje nazwe funckji
+            }
         }
         else if(strcmp(command_name, "info registers\n") == 0)
         {
