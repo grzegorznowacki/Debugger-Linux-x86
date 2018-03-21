@@ -1,6 +1,7 @@
 #include <libdwarf.h>
 #include <fcntl.h>
 #include "debugger_utils.h"
+#include "dwarf_utils.h"
 
 
 /*TODO zabezpieczyc, ze po zakonczeniu sie programu
