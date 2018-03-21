@@ -55,7 +55,7 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
 
     if(dwarf_init(file_desc, DW_DLC_READ, 0, 0, &dbg, &err) != DW_DLV_OK)
     {
-        printf("%s", "DWARF init failed");
+        printf("%s", "DWARF init failed\n");
         return;
     }
     //END OF DWARF SECTION
@@ -82,7 +82,7 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
             //DWARF SECTION
             if(dwarf_finish(dbg, &err) != DW_DLV_OK)
             {
-                printf("%s", "DWARF finish failed");
+                printf("%s", "DWARF finish failed\n");
                 return;
             }
             close(file_desc);

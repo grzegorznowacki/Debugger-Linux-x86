@@ -2,3 +2,5 @@ cmake-build*
 .idea
 debuggee_examples/*.o
 debuggee_examples/prog
+debuggee_examples/C-examples/*.o
+debuggee_examples/C-examples/prog
