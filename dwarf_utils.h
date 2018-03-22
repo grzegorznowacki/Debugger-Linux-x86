@@ -25,10 +25,12 @@
 
 void show_function_address_and_line(Dwarf_Debug dgb, Dwarf_Die the_die);
 
-void list_functions_with_address(Dwarf_Debug dbg, pid_t child_pid, int* wait_status, const char* command_name, breakpoint_struct** breakpoint_array, int* insert_elem);
+void list_functions_with_address(Dwarf_Debug dbg);
 
 Dwarf_Addr find_function_address(Dwarf_Debug dgb, Dwarf_Die the_die, char* function_name);
 
-void break_at_function(Dwarf_Debug dbg, pid_t child_pid, int* wait_status, const char* command_name, breakpoint_struct** breakpoint_array, int* insert_elem);
+void break_at_function(Dwarf_Debug dbg, pid_t child_pid, const char* command_name, breakpoint_struct** breakpoint_array, int* insert_elem);
+
+void line_address_mapping(Dwarf_Debug dbg);
 
 #endif //DEBUGGER_LINUX_X86_DWARF_UTILS_H

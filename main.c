@@ -141,7 +141,7 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
             if(strncmp(command_name, "break ", 6) == 0)     //zmienic API ewentualnie, zeby odroznic break linenum od break function
             {
                 DWARF_INIT()
-                break_at_function(dbg, child_pid, &wait_status, command_name, breakpoint_array, &insert_elem);    //tu tez zmienic API bo wczytuje nazwe funckji
+                break_at_function(dbg, child_pid, command_name, breakpoint_array, &insert_elem);    //tu tez zmienic API bo wczytuje nazwe funckji
                 DWARF_FINISH()
             }
         }
@@ -172,7 +172,13 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
         else if(strcmp(command_name, "info functions\n") == 0)
         {
             DWARF_INIT()
-            list_functions_with_address(dbg, child_pid, &wait_status, command_name, breakpoint_array, &insert_elem);
+            list_functions_with_address(dbg);
+            DWARF_FINISH()
+        }
+        else if(strcmp(command_name, "info lines\n") == 0)
+        {
+            DWARF_INIT()
+            line_address_mapping(dbg);
             DWARF_FINISH()
         }
 
