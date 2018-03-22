@@ -23,6 +23,7 @@
 #define MAX_BREAKPOINTS 20
 #define BREAK_ARG_LEN 8
 #define FUNCTION_NAME_LEN 30
+#define FUNCTION_LINE_LEN 8
 
 typedef struct breakpoint_struct_t breakpoint_struct;
 
@@ -55,11 +56,13 @@ int continue_debugging(pid_t child_pid, int* wait_status, breakpoint_struct** br
 
 void run_new(const char* child_prog_name);
 
-void break_at_address(pid_t child_pid, int* wait_status, const char* command_name, breakpoint_struct** breakpoint_array, int* insert_elem);
+void break_at_address(pid_t child_pid, const char* command_name, breakpoint_struct** breakpoint_array, int* insert_elem);
 
 void info_break(pid_t child_pid, breakpoint_struct** breakpoint_array, int* insert_elem);
 
 int del_breakpoint(pid_t child_pid, int* wait_status, const char* command_name, breakpoint_struct** breakpoint_array, int* insert_elem);
+
+void break_at_address_dwarf(pid_t child_pid, Dwarf_Unsigned address, breakpoint_struct** breakpoint_array, int* insert_elem);
 
 #define DEBUGGER_LINUX_X86_DEBUGGER_UTILS_H
 

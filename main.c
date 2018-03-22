@@ -134,14 +134,22 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
         {
             if(strncmp(command_name, "break 0x", 8) == 0)
             {
-                break_at_address(child_pid, &wait_status, command_name, breakpoint_array, &insert_elem);
+                break_at_address(child_pid, command_name, breakpoint_array, &insert_elem);
             }
+
             //TODO wiele plikow
-            //TODO przypadek - linia w kodzie - to chyba moze skorzystac z funkcji break_at_address()
-            if(strncmp(command_name, "break ", 6) == 0)     //zmienic API ewentualnie, zeby odroznic break linenum od break function
+
+            if(strncmp(command_name, "break line ", 11) == 0)
             {
                 DWARF_INIT()
-                break_at_function(dbg, child_pid, command_name, breakpoint_array, &insert_elem);    //tu tez zmienic API bo wczytuje nazwe funckji
+                break_at_line(dbg, child_pid, command_name, breakpoint_array, &insert_elem);
+                DWARF_FINISH()
+            }
+
+            if(strncmp(command_name, "break function ", 15) == 0)
+            {
+                DWARF_INIT()
+                break_at_function(dbg, child_pid, command_name, breakpoint_array, &insert_elem);
                 DWARF_FINISH()
             }
         }

@@ -197,7 +197,7 @@ Dwarf_Addr find_function_address(Dwarf_Debug dgb, Dwarf_Die the_die, char* funct
 void break_at_function(Dwarf_Debug dbg, pid_t child_pid, const char* command_name, breakpoint_struct** breakpoint_array, int* insert_elem)
 {
     char function_name[FUNCTION_NAME_LEN];
-    strncpy(function_name, command_name + 6, FUNCTION_NAME_LEN);
+    strncpy(function_name, command_name + 15, FUNCTION_NAME_LEN);
     char* new_line_ptr = strchr(function_name, '\n');
     *new_line_ptr = '\0';
 
@@ -326,5 +326,78 @@ void line_address_mapping(Dwarf_Debug dbg)
 
         printf("%s    %d    0x%08llx\n", filename, lineno, lineaddr);
     }
+}
 
+void break_at_line(Dwarf_Debug dbg, pid_t child_pid, const char* command_name, breakpoint_struct** breakpoint_array, int* insert_elem)
+{
+    char function_line_array[FUNCTION_LINE_LEN];
+    strncpy(function_line_array, command_name + 11, FUNCTION_LINE_LEN);
+    char* new_line_ptr = strchr(function_line_array, '\n');
+    *new_line_ptr = '\0';
+    unsigned long line_num = (unsigned long)strtol(function_line_array, NULL, 10);
+
+    Dwarf_Unsigned cu_header_length;
+    Dwarf_Unsigned abbrev_offset;
+    Dwarf_Unsigned next_cu_header;
+    Dwarf_Half version_stamp;
+    Dwarf_Half address_size;
+    Dwarf_Error err;
+    Dwarf_Die no_die = 0;
+    Dwarf_Die cu_die;
+    Dwarf_Die child_die;
+
+    int n;
+    Dwarf_Line *lines;
+    Dwarf_Signed nlines;
+    char *filename;
+    Dwarf_Addr lineaddr;
+    Dwarf_Unsigned lineno;
+
+    /* Find next compilation unit header */
+    if (dwarf_next_cu_header(dbg, &cu_header_length, &version_stamp, &abbrev_offset, &address_size, &next_cu_header, &err) == DW_DLV_ERROR)
+    {
+        printf("%s", "Error reading DWARF cu header\n");
+        exit(EXIT_FAILURE);
+    }
+
+    /* Expect the CU to have a single sibling - a DIE */
+    if (dwarf_siblingof(dbg, no_die, &cu_die, &err) == DW_DLV_ERROR)
+    {
+        printf("%s", "Error getting sibling of CU\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if (dwarf_srclines(cu_die, &lines, &nlines, &err) != DW_DLV_OK)
+    {
+        printf("%s", "Error dwarf_srclines");
+        exit(EXIT_FAILURE);
+    }
+
+    for (n = 0; n < nlines; n++) {
+        /* Retrieve the file name for this descriptor. */
+        if (dwarf_linesrc(lines[n], &filename, &err))
+        {
+            printf("%s", "Error dwarf_linesrc");
+            exit(EXIT_FAILURE);
+        }
+
+        /* Retrieve the line number in the source file. */
+        if (dwarf_lineno(lines[n], &lineno, &err))
+        {
+            printf("%s", "Error dwarf_lineno");
+            exit(EXIT_FAILURE);
+        }
+
+        /* Retrieve the virtual address for this line. */
+        if (dwarf_lineaddr(lines[n], &lineaddr, &err))
+        {
+            printf("%s", "Error dwarf_lineaddr");
+            exit(EXIT_FAILURE);
+        }
+
+        if(lineno == line_num)
+            break;
+    }
+
+    break_at_address_dwarf(child_pid, lineaddr, breakpoint_array, insert_elem);
 }

@@ -2,6 +2,7 @@
 // Created by gnowacki on 10.03.18.
 //
 
+#include <libdwarf.h>
 #include "debugger_utils.h"
 
 int stepi(pid_t child_pid, int* wait_status, unsigned int* counter, breakpoint_struct** breakpoint_array, int* insert_elem)
@@ -187,7 +188,7 @@ void free_breakpoint_array(breakpoint_struct** breakpoint_array)
     }
 }
 
-void break_at_address(pid_t child_pid, int* wait_status, const char* command_name, breakpoint_struct** breakpoint_array, int* insert_elem)
+void break_at_address(pid_t child_pid, const char* command_name, breakpoint_struct** breakpoint_array, int* insert_elem)
 {
     char address_array[8];
     strncpy(address_array, command_name + 8, 8);    //TODO ??? chyba ok
@@ -203,6 +204,13 @@ void break_at_address(pid_t child_pid, int* wait_status, const char* command_nam
     //TODO + patrz to co na kartce napisalem
     //TODO TO NIE TU A W RUN I CONTINUE PO WAIT TRZEBA JEDNAK IMPLEMENTOWAC!!!
     //i moze tez w stepi itd !!! plus ta tablica do zrobienia i sprwadzenia!!
+}
+
+void break_at_address_dwarf(pid_t child_pid, Dwarf_Unsigned address, breakpoint_struct** breakpoint_array, int* insert_elem)
+{
+    breakpoint_struct* breakpoint = create_breakpoint(child_pid, (void*)address);
+    breakpoint_array[*insert_elem] = breakpoint;
+    (*insert_elem)++;
 }
 
 //TODO change to void probably
