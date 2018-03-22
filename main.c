@@ -9,6 +9,8 @@
  * bo SIGABRT
  * */
 
+//TODO uniemozliwic stawianie breakpointa w tym samym miejscu wielokrotnie - na razie nie ma sprawdzenia tego
+
 
 
 void run_debuggee_proc(const char* prog_name)
@@ -53,12 +55,6 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
         perror("open");
         return;
     }
-
-    if(dwarf_init(file_desc, DW_DLC_READ, 0, 0, &dbg, &err) != DW_DLV_OK)
-    {
-        printf("%s", "DWARF init failed\n");
-        return;
-    }
     //END OF DWARF SECTION
 
     printf("%s\n", "Parent proc");
@@ -81,11 +77,6 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
             free_breakpoint_array(breakpoint_array);
 
             //DWARF SECTION
-            if(dwarf_finish(dbg, &err) != DW_DLV_OK)
-            {
-                printf("%s", "DWARF finish failed\n");
-                return;
-            }
             close(file_desc);
             //END OF DWARF SECTION
 
@@ -149,7 +140,9 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
             //TODO przypadek - linia w kodzie - to chyba moze skorzystac z funkcji break_at_address()
             if(strncmp(command_name, "break ", 6) == 0)     //zmienic API ewentualnie, zeby odroznic break linenum od break function
             {
+                DWARF_INIT()
                 break_at_function(dbg, child_pid, &wait_status, command_name, breakpoint_array, &insert_elem);    //tu tez zmienic API bo wczytuje nazwe funckji
+                DWARF_FINISH()
             }
         }
         else if(strcmp(command_name, "info registers\n") == 0)
@@ -178,10 +171,12 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
         }
         else if(strcmp(command_name, "info functions\n") == 0)
         {
+            DWARF_INIT()
             list_functions_with_address(dbg, child_pid, &wait_status, command_name, breakpoint_array, &insert_elem);
+            DWARF_FINISH()
         }
 
-            printf("(deb)");
+        printf("(deb)");
     }
 }
 
