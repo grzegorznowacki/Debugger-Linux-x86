@@ -129,9 +129,77 @@ void list_functions_with_address(Dwarf_Debug dbg, pid_t child_pid, int *wait_sta
     }
 }
 
+Dwarf_Addr find_function_address(Dwarf_Debug dgb, Dwarf_Die the_die, char* function_name)
+{
+    char* die_name = 0;
+    const char* tag_name = 0;
+    Dwarf_Error err;
+    Dwarf_Half tag;
+    Dwarf_Attribute* attrs;
+    Dwarf_Addr lowpc;
+    Dwarf_Signed attrcount;
+    Dwarf_Signed i;
+    Dwarf_Unsigned line;
+
+    int rc = dwarf_diename(the_die, &die_name, &err);
+
+    if(rc == DW_DLV_ERROR)
+    {
+        printf("%s", "Error in dwarf_diename\n");
+        exit(EXIT_FAILURE);
+    }
+    else if(rc == DW_DLV_NO_ENTRY)
+        return 0;
+
+    if(strcmp(die_name, function_name) != 0)
+        return 0;
+
+    if (dwarf_tag(the_die, &tag, &err) != DW_DLV_OK)
+    {
+        printf("%s", "Error in dwarf_tag\n");
+        exit(EXIT_FAILURE);
+    }
+
+    /* Only interested in subprogram DIEs here */
+    if (tag != DW_TAG_subprogram)
+        return 0;
+
+    if (dwarf_get_TAG_name(tag, &tag_name) != DW_DLV_OK)
+    {
+        printf("%s", "Error in dwarf_get_TAG_name\n");
+        exit(EXIT_FAILURE);
+    }
+
+    /* Grab the DIEs attributes for display */
+    if (dwarf_attrlist(the_die, &attrs, &attrcount, &err) != DW_DLV_OK)
+    {
+        printf("%s", "Error in dwarf_attlist\n");
+        exit(EXIT_FAILURE);
+    }
+
+    for (i = 0; i < attrcount; ++i)
+    {
+        Dwarf_Half attrcode;
+        if (dwarf_whatattr(attrs[i], &attrcode, &err) != DW_DLV_OK) {
+            printf("%s", "Error in dwarf_whatattr\n");
+            exit(EXIT_FAILURE);
+        }
+
+        if (attrcode == DW_AT_low_pc)
+        {
+            dwarf_formaddr(attrs[i], &lowpc, 0);
+            return lowpc;
+        }
+    }
+    return 0;
+}
+
 void break_at_function(Dwarf_Debug dbg, pid_t child_pid, int* wait_status, const char* command_name, breakpoint_struct** breakpoint_array, int* insert_elem)
 {
-    //TODO wczytywanie adresu
+    char function_name[FUNCTION_NAME_LEN];
+    strncpy(function_name, command_name + 6, FUNCTION_NAME_LEN);
+    char* new_line_ptr = strchr(function_name, '\n');
+    *new_line_ptr = '\0';
 
     Dwarf_Unsigned cu_header_length;
     Dwarf_Unsigned abbrev_offset;
@@ -164,12 +232,17 @@ void break_at_function(Dwarf_Debug dbg, pid_t child_pid, int* wait_status, const
         exit(EXIT_FAILURE);
     }
 
+    Dwarf_Addr function_address = 0;     //typedef unsigned long
+
     /* Go over all children DIEs */
     while(1)
     {
         int ret;
 
-        show_function_address_and_line(dbg, child_die);
+        function_address = find_function_address(dbg, child_die, function_name);
+
+        if(function_address != 0)
+            break;
 
         ret = dwarf_siblingof(dbg, child_die, &child_die, &err);
 
@@ -185,9 +258,7 @@ void break_at_function(Dwarf_Debug dbg, pid_t child_pid, int* wait_status, const
     }
 
 
-    //todo to chyba do find_fuction_address przeniesc
-    unsigned int address;   //TODO - TO BEDZIE ADRES POZYSKANY Z DWARFA
-    breakpoint_struct* breakpoint = create_breakpoint(child_pid, (void*)address);
+    breakpoint_struct* breakpoint = create_breakpoint(child_pid, (void*)function_address);
     breakpoint_array[*insert_elem] = breakpoint;
     (*insert_elem)++;
 }

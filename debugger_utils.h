@@ -22,6 +22,7 @@
 #define COMMAND_LEN 30
 #define MAX_BREAKPOINTS 20
 #define BREAK_ARG_LEN 8
+#define FUNCTION_NAME_LEN 30
 
 typedef struct breakpoint_struct_t breakpoint_struct;
 
