@@ -14,7 +14,7 @@ void show_function_address_and_line(Dwarf_Debug dgb, Dwarf_Die the_die)
     Dwarf_Addr lowpc;
     Dwarf_Signed attrcount;
     Dwarf_Signed i;
-    Dwarf_Line line;
+    Dwarf_Unsigned line;
 
     int rc = dwarf_diename(the_die, &die_name, &err);
 
@@ -61,13 +61,17 @@ void show_function_address_and_line(Dwarf_Debug dgb, Dwarf_Die the_die)
         }
 
         if (attrcode == DW_AT_low_pc)
-            dwarf_formaddr(attrs[i], &lowpc, 0);
-        else if (attrcode == DW_AT_decl_line)
         {
-            //dwarf_form
+            dwarf_formaddr(attrs[i], &lowpc, 0);
+        }
+
+        if (attrcode == DW_AT_decl_line)
+        {
+            dwarf_formudata(attrs[i], &line, 0);
         }
     }
 
+    printf("%d    ", line);
     printf("0x%08llx\n", lowpc);
 }
 
