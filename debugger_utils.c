@@ -16,7 +16,7 @@ int stepi(pid_t child_pid, int* wait_status, unsigned int* counter, breakpoint_s
         (*counter)++;
         struct user_regs_struct registers;
         ptrace(PTRACE_GETREGS, child_pid, 0, &registers);
-        unsigned int eip = registers.eip;           //TODO long int should be
+        unsigned int eip = registers.eip;
 
         if((breakpoint != NULL) && ((ptrace(PTRACE_PEEKTEXT, child_pid, breakpoint->address, 0) & 0xFF) == 0xCC))
         {
@@ -90,8 +90,6 @@ void run_new(const char* child_prog_name)
     }
 }
 
-//TODO run - nie jestem pewien czy to wystarczy
-//TODO moze cos jeszcze z makrami WIF...
 int run(pid_t child_pid, int* wait_status, breakpoint_struct** breakpoint_array, int* insert_elem)
 {
     ptrace(PTRACE_CONT, child_pid, 0, 0);
@@ -191,19 +189,12 @@ void free_breakpoint_array(breakpoint_struct** breakpoint_array)
 void break_at_address(pid_t child_pid, const char* command_name, breakpoint_struct** breakpoint_array, int* insert_elem)
 {
     char address_array[8];
-    strncpy(address_array, command_name + 8, 8);    //TODO ??? chyba ok
-    unsigned int address = (unsigned int)strtol(address_array, NULL, 16);   //TODO ??? chyba ok
-    //TODO long zamiast unsigned int??? na 32 bitach to chyba to samo
+    strncpy(address_array, command_name + 8, 8);
+    unsigned int address = (unsigned int)strtol(address_array, NULL, 16);
 
     breakpoint_struct* breakpoint = create_breakpoint(child_pid, (void*)address);
     breakpoint_array[*insert_elem] = breakpoint;
     (*insert_elem)++;
-    //TODO wtablice wskznikow zrobic
-    //TODO i ogolnie dokonczyc bo na razei zrobilem tylko create
-    //TODO tu bedzie trzeb zrobic to co jest w resume from breakpoint!!!
-    //TODO + patrz to co na kartce napisalem
-    //TODO TO NIE TU A W RUN I CONTINUE PO WAIT TRZEBA JEDNAK IMPLEMENTOWAC!!!
-    //i moze tez w stepi itd !!! plus ta tablica do zrobienia i sprwadzenia!!
 }
 
 void break_at_address_dwarf(pid_t child_pid, Dwarf_Unsigned address, breakpoint_struct** breakpoint_array, int* insert_elem)
@@ -213,7 +204,6 @@ void break_at_address_dwarf(pid_t child_pid, Dwarf_Unsigned address, breakpoint_
     (*insert_elem)++;
 }
 
-//TODO change to void probably
 int clean_breakpoint_and_stepback(pid_t pid, int* wait_status, breakpoint_struct** breakpoint_array, int* insert_elem)
 {
     breakpoint_struct* breakpoint;

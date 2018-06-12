@@ -100,19 +100,11 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
                 }
             }
         }
-        else if(strcmp(command_name, "step\n") == 0)
-        {
-
-        }
         else if(strcmp(command_name, "stepi\n") == 0)
         {
             int ret_status = stepi(child_pid, &wait_status, &counter, breakpoint_array, &insert_elem);
             if(ret_status == 1)
                 printf("Debugee program has ended\n");
-        }
-        else if(strcmp(command_name, "next\n") == 0)
-        {
-
         }
         else if(strncmp(command_name, "break ", 6) == 0)    //IMPORTANT - space after break
         {
@@ -138,10 +130,6 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
         else if(strcmp(command_name, "info registers\n") == 0)
         {
             info_registers(child_pid);
-        }
-        else if(strncmp(command_name, "clear ", 6) == 0)  //TODO clear line_num
-        {
-
         }
         else if(strncmp(command_name, "del ", 4) == 0)
         {
