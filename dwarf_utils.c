@@ -42,9 +42,6 @@ void show_function_address_and_line(Dwarf_Debug dgb, Dwarf_Die the_die)
         exit(EXIT_FAILURE);
     }
 
-    /* Print function name */
-    printf("<%s>    ", die_name);
-
     /* Grab the DIEs attributes for display */
     if (dwarf_attrlist(the_die, &attrs, &attrcount, &err) != DW_DLV_OK)
     {
@@ -52,6 +49,7 @@ void show_function_address_and_line(Dwarf_Debug dgb, Dwarf_Die the_die)
         exit(EXIT_FAILURE);
     }
 
+    int counter = 0;
     for (i = 0; i < attrcount; ++i)
     {
         Dwarf_Half attrcode;
@@ -64,6 +62,10 @@ void show_function_address_and_line(Dwarf_Debug dgb, Dwarf_Die the_die)
         {
             dwarf_formaddr(attrs[i], &lowpc, 0);
         }
+        else
+        {
+            counter++;
+        }
 
         if (attrcode == DW_AT_decl_line)
         {
@@ -71,8 +73,13 @@ void show_function_address_and_line(Dwarf_Debug dgb, Dwarf_Die the_die)
         }
     }
 
-    printf("%d    ", line);
-    printf("0x%08llx\n", lowpc);
+    if(counter == attrcount - 1)
+    {
+        /* Print function name */
+        printf("<%s>    ", die_name);
+        printf("%d    ", line);
+        printf("0x%08llx\n", lowpc);
+    }
 }
 
 void list_functions_with_address(Dwarf_Debug dbg)
