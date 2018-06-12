@@ -4,15 +4,6 @@
 #include "dwarf_utils.h"
 
 
-/*TODO zabezpieczyc, ze po zakonczeniu sie programu
- * debugowanego uzywania opcji del breakpoint ( a konkretnie deisable_breakpoint)
- * bo SIGABRT
- * */
-
-//TODO uniemozliwic stawianie breakpointa w tym samym miejscu wielokrotnie - na razie nie ma sprawdzenia tego
-
-
-
 void run_debuggee_proc(const char* prog_name)
 {
     printf("%s\n", "Child proc");
@@ -65,13 +56,6 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
 
     while(fgets(command_name, COMMAND_LEN, stdin))
     {
-        //printf("%s", command_name);
-        //printf("%d", strcmp(command_name, "quit\n"));
-        //TODO Jak wyjdziemy z debuggera to osierocimy dziecko.
-        //TODO Ale w sumie to malo wazne bo wtedy dziecko zostaje
-        //TODO zaadoptowane przez proces init bodajze i on go usunie
-        //TODO czy jakos tak. Sasza cos o tym chyba wspominal.
-        //TODO Wiec sie tym nie martwimy, co nie???
         if(strcmp(command_name, "quit\n") == 0) //IMPORTANT - \n - because fgets puts also LF into command_name
         {
             free_breakpoint_array(breakpoint_array);
@@ -116,19 +100,11 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
                 }
             }
         }
-        else if(strcmp(command_name, "step\n") == 0)
-        {
-
-        }
         else if(strcmp(command_name, "stepi\n") == 0)
         {
             int ret_status = stepi(child_pid, &wait_status, &counter, breakpoint_array, &insert_elem);
             if(ret_status == 1)
                 printf("Debugee program has ended\n");
-        }
-        else if(strcmp(command_name, "next\n") == 0)
-        {
-
         }
         else if(strncmp(command_name, "break ", 6) == 0)    //IMPORTANT - space after break
         {
@@ -136,8 +112,6 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
             {
                 break_at_address(child_pid, command_name, breakpoint_array, &insert_elem);
             }
-
-            //TODO wiele plikow
 
             if(strncmp(command_name, "break line ", 11) == 0)
             {
@@ -157,11 +131,7 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
         {
             info_registers(child_pid);
         }
-        else if(strncmp(command_name, "clear ", 6) == 0)  //TODO clear line_num
-        {
-
-        }
-        else if(strncmp(command_name, "del ", 4) == 0)    //TODO del breakpt_num
+        else if(strncmp(command_name, "del ", 4) == 0)
         {
             int break_num = del_breakpoint(child_pid, &wait_status, command_name, breakpoint_array, &insert_elem);
             if(break_num != -1)
@@ -173,7 +143,7 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
                 printf("%s\n", "No such breakpoint");
             }
         }
-        else if(strcmp(command_name, "info break\n") == 0)    //TODO show breakpoints
+        else if(strcmp(command_name, "info break\n") == 0)
         {
             info_break(child_pid, breakpoint_array, &insert_elem);
         }
