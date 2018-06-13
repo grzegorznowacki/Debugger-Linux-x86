@@ -332,7 +332,7 @@ void line_address_mapping(Dwarf_Debug dbg)
         }
 
         printf("%s    %d", filename, lineno);
-        printf("    0x%x\n", lineaddr);
+        printf("    0x%08x\n", lineaddr);
     }
 }
 

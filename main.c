@@ -31,6 +31,7 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
     int wait_status;
     unsigned int counter = 0;
     char command_name[COMMAND_LEN];
+    char hasEnded = 0;
 
     breakpoint_struct* breakpoint_array[MAX_BREAKPOINTS];
     int  insert_elem = 0;
@@ -76,6 +77,7 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
                 if (ret_status == 0)
                 {
                     printf("Debuggee program has ended\n\n");
+                    hasEnded = 1;
                 }
             }
             else
@@ -96,6 +98,7 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
                 if (ret_status == 0)
                 {
                     printf("Debuggee program has ended\n\n");
+                    hasEnded = 1;
                 }
             }
         }
@@ -105,7 +108,10 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
             {
                 int ret_status = stepi(child_pid, &wait_status, &counter, breakpoint_array, &insert_elem);
                 if (ret_status == 1)
+                {
                     printf("Debugee program has ended\n");
+                    hasEnded = 1;
+                }
             }
             else
             {
@@ -137,7 +143,7 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
         }
         else if(strcmp(command_name, "info registers\n") == 0)
         {
-            if(is_first_run != 1)
+            if(is_first_run != 1 && hasEnded == 0)
             {
                 info_registers(child_pid);
             }
