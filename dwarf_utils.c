@@ -331,7 +331,8 @@ void line_address_mapping(Dwarf_Debug dbg)
             exit(EXIT_FAILURE);
         }
 
-        printf("%s    %d    0x%08llx\n", filename, lineno, lineaddr);
+        printf("%s    %d", filename, lineno);
+        printf("    0x%x\n", lineaddr);
     }
 }
 
