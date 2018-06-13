@@ -87,8 +87,7 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
         {
             if(is_first_run == 1)
             {
-                printf("%s", "<continue> not possible here - use <run> instead");
-                is_first_run = 0;
+                printf("%s\n", "<continue> not possible here - use <run> instead");
             }
             else
             {
@@ -102,9 +101,16 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
         }
         else if(strcmp(command_name, "stepi\n") == 0)
         {
-            int ret_status = stepi(child_pid, &wait_status, &counter, breakpoint_array, &insert_elem);
-            if(ret_status == 1)
-                printf("Debugee program has ended\n");
+            if(is_first_run != 1)
+            {
+                int ret_status = stepi(child_pid, &wait_status, &counter, breakpoint_array, &insert_elem);
+                if (ret_status == 1)
+                    printf("Debugee program has ended\n");
+            }
+            else
+            {
+                printf("%s\n", "The program is not being run.");
+            }
         }
         else if(strncmp(command_name, "break ", 6) == 0)    //IMPORTANT - space after break
         {
@@ -112,24 +118,33 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
             {
                 break_at_address(child_pid, command_name, breakpoint_array, &insert_elem);
             }
-
-            if(strncmp(command_name, "break line ", 11) == 0)
+            else if(strncmp(command_name, "break line ", 11) == 0)
             {
                 DWARF_INIT()
                 break_at_line(dbg, child_pid, command_name, breakpoint_array, &insert_elem);
                 DWARF_FINISH()
             }
-
-            if(strncmp(command_name, "break function ", 15) == 0)
+            else if(strncmp(command_name, "break function ", 15) == 0)
             {
                 DWARF_INIT()
                 break_at_function(dbg, child_pid, command_name, breakpoint_array, &insert_elem);
                 DWARF_FINISH()
             }
+            else
+            {
+                printf("%s\n", "Wrong command.");
+            }
         }
         else if(strcmp(command_name, "info registers\n") == 0)
         {
-            info_registers(child_pid);
+            if(is_first_run != 1)
+            {
+                info_registers(child_pid);
+            }
+            else
+            {
+                printf("%s\n", "The program has no registers now.");
+            }
         }
         else if(strncmp(command_name, "del ", 4) == 0)
         {
@@ -158,6 +173,10 @@ void run_debugger_proc(pid_t child_pid, const char* child_prog_name)
             DWARF_INIT()
             line_address_mapping(dbg);
             DWARF_FINISH()
+        }
+        else
+        {
+            printf("%s\n", "Wrong command.");
         }
 
         printf("(deb)");
